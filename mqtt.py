@@ -56,6 +56,6 @@ def main():
             if new_data:
                 display_climate.update_display(store[temp_tn], store[rh_tn], store[light_tn], store[vpd_tn])
                 new_data = False
-            time.sleep(10)
+            time.sleep(1)
     finally:
         c.disconnect()
