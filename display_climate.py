@@ -1,7 +1,8 @@
 from lcd import initialize, puts, clear, set_pos
 
-initialize()
-puts('Ready...')
+def init():
+  initialize()
+  puts('Ready...')
 
 def get_climate_json():
     import socket
@@ -20,14 +21,13 @@ def get_climate_json():
     s.close()
     return j
 
-def update():
-  data = get_climate_json()
+def update_display(temp_raw, rh_raw, light_raw, vpd_raw):
   # get everything to a useful precision
-  temp = str(round(data['temp'], 1))
-  RH  = str(round(data['RH'], 1))
-  light = str(round(data['light'], 1))
-  vpd_prec = 2 if data['vpd'] < 1 else 1
-  vpd = str(round(data['vpd'], vpd_prec))
+  temp = str(round(temp_raw, 1))
+  RH  = str(round(rh_raw, 1))
+  light = str(round(light_raw, 1))
+  vpd_prec = 2 if vpd_raw < 1 else 1
+  vpd = str(round(vpd_raw, vpd_prec))
   # assemble strings
   top = temp + "degF " + RH + "%RH"
   bot = light + "LT " + vpd + "kPa"
@@ -35,4 +35,8 @@ def update():
   puts(top)
   set_pos(0,1)
   puts(bot)
+
+def update():
+  data = get_climate_json()
+  update_display(data['temp'], data['RH'], data['light'], data['vpd'])
 
