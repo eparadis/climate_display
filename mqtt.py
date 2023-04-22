@@ -22,6 +22,8 @@ store = { temp_tn: 0,
 
 new_data = False
 
+current_line = 0
+
 def sub_cb(topic, msg):
     global new_data, store
     if topic not in store:
@@ -31,41 +33,42 @@ def sub_cb(topic, msg):
         print((topic, store[topic]))
         new_data = True
 
-def puts_firstline(msg):
-    set_pos(0,0)
+def puts_scroll(msg):
+    global current_line
+    set_pos(0,current_line)
     puts(msg)
-
-def puts_secondline(msg):
-    set_pos(0,1)
-    puts(msg)
+    if current_line == 0:
+        current_line = 1
+    else:
+        current_line = 0
 
 def main():
     global new_data, store
     
-    puts_secondline("Starting LCD...")
+    puts_scroll("Starting LCD...")
     display_climate.init()
 
-    puts_firstline("Starting MQTT...")
+    puts_scroll("Starting MQTT...")
     try:
       c = MQTTClient(CLIENT_ID, SERVER)
     except Exception as exc:
-        puts_secondline(repr(exc))
-        puts_firstline("sleeping...")
+        puts_scroll(repr(exc))
+        puts_scroll("sleeping...")
         time.sleep(5)
-        puts_secondline("reseting...")
+        puts_scroll("reseting...")
         import machine
         machine.reset()
     # Subscribed messages will be delivered to this callback
     c.set_callback(sub_cb)
     c.connect()
-    puts_secondline("%s OK" % (SERVER,))
+    puts_scroll("%s OK" % (SERVER,))
     for topic in store.keys():
-        puts_firstline("Sub'ing to:%s" % (topic[-20:-16],))
-        puts_secondline("'%s'" % (topic[-16:])) # only show last 16 chars bc the LCD is small
+        puts_scroll("Sub'ing to:%s" % (topic[-20:-16],))
+        puts_scroll("'%s'" % (topic[-16:])) # only show last 16 chars bc the LCD is small
         c.subscribe(topic)
-        puts_secondline("..sub'd. wait 1s")
+        puts_scroll("..sub'd. wait 1s")
         time.sleep(1)
-    puts_firstline("Init complete")
+    puts_scroll("Init complete")
 
     try:
         while 1:
@@ -78,12 +81,12 @@ def main():
             gc.collect()
             time.sleep_ms(500)
     except Exception as exc:
-        puts_firstline(repr(exc))
+        puts_scroll(repr(exc))
     finally:
-        puts_secondline("disconnecting")
+        puts_scroll("disconnecting")
         c.disconnect()
-        puts_firstline("sleeping...")
+        puts_scroll("sleeping...")
         time.sleep(5)
-        puts_secondline("reseting...")
+        puts_scroll("reseting...")
         import machine
         machine.reset()
