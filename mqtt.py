@@ -31,24 +31,32 @@ def sub_cb(topic, msg):
         print((topic, store[topic]))
         new_data = True
 
+def puts_firstline(msg):
+    set_pos(0,0)
+    puts(msg)
+
+def puts_secondline(msg):
+    set_pos(0,1)
+    puts(msg)
+
 def main():
     global new_data, store
     
-    print("Starting LCD...")
+    puts_secondline("Starting LCD...")
     display_climate.init()
 
-    print("Starting MQTT...")
+    puts_firstline("Starting MQTT...")
     c = MQTTClient(CLIENT_ID, SERVER)
     # Subscribed messages will be delivered to this callback
     c.set_callback(sub_cb)
     c.connect()
-    print("Connected to %s" % (SERVER,))
+    puts_secondline("Connected to %s" % (SERVER,))
     for topic in store.keys():
-        print("Subscribing to topic '%s'" % (topic))
+        puts_firstline("Subscribing to topic '%s'" % (topic))
         c.subscribe(topic)
-        print("...subscribed. Throttling for 1 second")
+        puts_secondline("...subscribed. Throttling for 1 second")
         time.sleep(1)
-    print("Initialization complete")
+    puts_firstline("Initialization complete")
 
     try:
         while 1:
@@ -61,12 +69,12 @@ def main():
                 gc.collect()
             time.sleep(0.01)
     except Exception as exc:
-        set_pos(0,0)
-        puts(repr(exc))
+        puts_firstline(repr(exc))
     finally:
-        set_pos(0,1)
-        puts("disconnecting")
+        puts_secondline("disconnecting")
         c.disconnect()
+        puts_firstline("sleeping...")
         time.sleep(5)
+        puts_secondline("reseting...")
         import machine
         machine.reset()
