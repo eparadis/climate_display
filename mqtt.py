@@ -63,8 +63,8 @@ def main():
   c.connect()
   puts_scroll("%s OK" % (SERVER,))
   for topic in store.keys():
-    puts_scroll("Sub'ing to:%s" % (topic[-20:-16],))
-    puts_scroll("'%s'" % (topic[-16:])) # only show last 16 chars bc the LCD is small
+    puts_scroll("Sub'ing:%s" % (topic[-24:-16].decode(),))
+    puts_scroll("'%s'" % (topic[-16:].decode())) # only show last 16 chars bc the LCD is small
     c.subscribe(topic)
     puts_scroll("..sub'd. wait 1s")
     time.sleep(1)
