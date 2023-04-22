@@ -25,68 +25,69 @@ new_data = False
 current_line = 0
 
 def sub_cb(topic, msg):
-    global new_data, store
-    if topic not in store:
-        print("unexpected subscription message from topic '%s'" % (topic))
-    else:
-        store[topic] = float(msg.decode())
-        print((topic, store[topic]))
-        new_data = True
+  global new_data, store
+  if topic not in store:
+    print("unexpected subscription message from topic '%s'" % (topic))
+  else:
+    store[topic] = float(msg.decode())
+    print((topic, store[topic]))
+    new_data = True
 
 def puts_scroll(msg):
-    global current_line
-    set_pos(0,current_line)
-    puts(msg)
-    if current_line == 0:
-        current_line = 1
-    else:
-        current_line = 0
+  global current_line
+  set_pos(0,current_line)
+  puts(msg)
+  if current_line == 0:
+    current_line = 1
+  else:
+    current_line = 0
 
 def main():
-    global new_data, store
-    
-    puts_scroll("Starting LCD...")
-    display_climate.init()
+  global new_data, store
+  
+  puts_scroll("Starting LCD...")
+  display_climate.init()
 
-    puts_scroll("Starting MQTT...")
-    try:
-      c = MQTTClient(CLIENT_ID, SERVER)
-    except Exception as exc:
-        puts_scroll(repr(exc))
-        puts_scroll("sleeping...")
-        time.sleep(5)
-        puts_scroll("reseting...")
-        import machine
-        machine.reset()
-    # Subscribed messages will be delivered to this callback
-    c.set_callback(sub_cb)
-    c.connect()
-    puts_scroll("%s OK" % (SERVER,))
-    for topic in store.keys():
-        puts_scroll("Sub'ing to:%s" % (topic[-20:-16],))
-        puts_scroll("'%s'" % (topic[-16:])) # only show last 16 chars bc the LCD is small
-        c.subscribe(topic)
-        puts_scroll("..sub'd. wait 1s")
-        time.sleep(1)
-    puts_scroll("Init complete")
+  puts_scroll("Starting MQTT...")
+  try:
+    c = MQTTClient(CLIENT_ID, SERVER)
+  except Exception as exc:
+    puts_scroll(repr(exc))
+    puts_scroll("sleeping...")
+    time.sleep(5)
+    puts_scroll("reseting...")
+    import machine
+    machine.reset()
+  # Subscribed messages will be delivered to this callback
+  c.set_callback(sub_cb)
+  c.connect()
+  puts_scroll("%s OK" % (SERVER,))
+  for topic in store.keys():
+    puts_scroll("Sub'ing to:%s" % (topic[-20:-16],))
+    puts_scroll("'%s'" % (topic[-16:])) # only show last 16 chars bc the LCD is small
+    c.subscribe(topic)
+    puts_scroll("..sub'd. wait 1s")
+    time.sleep(1)
+  puts_scroll("Init complete")
 
-    try:
-        while 1:
-            # micropython.mem_info()
-            # c.wait_msg()
-            c.check_msg()
-            if new_data:
-                display_climate.update_display(store[temp_tn], store[rh_tn], store[light_tn], store[vpd_tn])
-                new_data = False
-            gc.collect()
-            time.sleep_ms(500)
-    except Exception as exc:
-        puts_scroll(repr(exc))
-    finally:
-        puts_scroll("disconnecting")
-        c.disconnect()
-        puts_scroll("sleeping...")
-        time.sleep(5)
-        puts_scroll("reseting...")
-        import machine
-        machine.reset()
+  try:
+    while 1:
+      # micropython.mem_info()
+      # c.wait_msg()
+      c.check_msg()
+      if new_data:
+        display_climate.update_display(store[temp_tn], store[rh_tn], store[light_tn], store[vpd_tn])
+        new_data = False
+      gc.collect()
+      time.sleep_ms(500)
+  except Exception as exc:
+    puts_scroll(repr(exc))
+  finally:
+    puts_scroll("cleaning up...")
+    #puts_scroll("disconnecting")
+    #c.disconnect()
+    puts_scroll("sleeping...")
+    time.sleep(5)
+    puts_scroll("reseting...")
+    import machine
+    machine.reset()
