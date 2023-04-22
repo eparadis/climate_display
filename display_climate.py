@@ -29,8 +29,8 @@ def update_display(temp_raw, rh_raw, light_raw, vpd_raw):
   vpd_prec = 2 if vpd_raw < 1 else 1
   vpd = str(round(vpd_raw, vpd_prec))
   # assemble strings
-  top = temp + "degF " + RH + "%RH"
-  bot = light + "LT " + vpd + "kPa"
+  top = temp + "degF " + RH + "%RH    "
+  bot = light + "LT " + vpd + "kPa    "
   set_pos(0,0)
   puts(top)
   set_pos(0,1)
