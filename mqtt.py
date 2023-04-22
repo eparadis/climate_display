@@ -1,8 +1,10 @@
 from umqtt.simple import MQTTClient
+from lcd import puts, set_pos
 import ubinascii
 import machine
 import time
 import display_climate
+import gc
 
 # Default MQTT server to connect to
 SERVER = "192.168.0.69"
@@ -56,6 +58,15 @@ def main():
             if new_data:
                 display_climate.update_display(store[temp_tn], store[rh_tn], store[light_tn], store[vpd_tn])
                 new_data = False
-            time.sleep(1)
+                gc.collect()
+            time.sleep(0.01)
+    except Exception as exc:
+        set_pos(0,0)
+        puts(repr(exc))
     finally:
+        set_pos(0,1)
+        puts("disconnecting")
         c.disconnect()
+        time.sleep(5)
+        import machine
+        machine.reset()
