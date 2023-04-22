@@ -19,9 +19,7 @@ store = { temp_tn: 0,
   light_tn: 0,
   vpd_tn: 0
 }
-
 new_data = False
-
 current_line = 0
 
 def sub_cb(topic, msg):
@@ -42,6 +40,12 @@ def puts_scroll(msg):
   else:
     current_line = 0
 
+def reset():
+  puts_scroll("reseting in 5s...")
+  time.sleep(5)
+  import machine
+  machine.reset()
+
 def main():
   global new_data, store
   
@@ -53,11 +57,7 @@ def main():
     c = MQTTClient(CLIENT_ID, SERVER)
   except Exception as exc:
     puts_scroll(repr(exc))
-    puts_scroll("sleeping...")
-    time.sleep(5)
-    puts_scroll("reseting...")
-    import machine
-    machine.reset()
+    reset()
   # Subscribed messages will be delivered to this callback
   c.set_callback(sub_cb)
   c.connect()
@@ -72,9 +72,8 @@ def main():
 
   try:
     while 1:
-      # micropython.mem_info()
-      # c.wait_msg()
-      c.check_msg()
+      # c.wait_msg() # blocking
+      c.check_msg() # non-blocking
       if new_data:
         display_climate.update_display(store[temp_tn], store[rh_tn], store[light_tn], store[vpd_tn])
         new_data = False
@@ -82,12 +81,6 @@ def main():
       time.sleep_ms(500)
   except Exception as exc:
     puts_scroll(repr(exc))
+    time.sleep(3)
   finally:
-    puts_scroll("cleaning up...")
-    #puts_scroll("disconnecting")
-    #c.disconnect()
-    puts_scroll("sleeping...")
-    time.sleep(5)
-    puts_scroll("reseting...")
-    import machine
-    machine.reset()
+    reset()
