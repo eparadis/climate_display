@@ -46,17 +46,26 @@ def main():
     display_climate.init()
 
     puts_firstline("Starting MQTT...")
-    c = MQTTClient(CLIENT_ID, SERVER)
+    try:
+      c = MQTTClient(CLIENT_ID, SERVER)
+    except Exception as exc:
+        puts_secondline(repr(exc))
+        puts_firstline("sleeping...")
+        time.sleep(5)
+        puts_secondline("reseting...")
+        import machine
+        machine.reset()
     # Subscribed messages will be delivered to this callback
     c.set_callback(sub_cb)
     c.connect()
-    puts_secondline("Connected to %s" % (SERVER,))
+    puts_secondline("%s OK" % (SERVER,))
     for topic in store.keys():
-        puts_firstline("Subscribing to topic '%s'" % (topic))
+        puts_firstline("Sub'ing to:%s" % (topic[-20:-16],))
+        puts_secondline("'%s'" % (topic[-16:])) # only show last 16 chars bc the LCD is small
         c.subscribe(topic)
-        puts_secondline("...subscribed. Throttling for 1 second")
+        puts_secondline("..sub'd. wait 1s")
         time.sleep(1)
-    puts_firstline("Initialization complete")
+    puts_firstline("Init complete")
 
     try:
         while 1:
@@ -66,8 +75,8 @@ def main():
             if new_data:
                 display_climate.update_display(store[temp_tn], store[rh_tn], store[light_tn], store[vpd_tn])
                 new_data = False
-                gc.collect()
-            time.sleep(0.01)
+            gc.collect()
+            time.sleep_ms(500)
     except Exception as exc:
         puts_firstline(repr(exc))
     finally:
