@@ -52,23 +52,23 @@ def main():
   puts_scroll("Starting LCD...")
   display_climate.init()
 
-  puts_scroll("Starting MQTT...")
   try:
+    puts_scroll("Starting MQTT...")
     c = MQTTClient(CLIENT_ID, SERVER)
+    c.set_callback(sub_cb)
+    puts_scroll("Connecting...")
+    c.connect()
+    puts_scroll("%s OK" % (SERVER,))
+    for topic in store.keys():
+      puts_scroll("Sub'ing:%s" % (topic[-24:-16].decode(),))
+      puts_scroll("'%s'" % (topic[-16:].decode())) # only show last 16 chars bc the LCD is small
+      c.subscribe(topic)
+      puts_scroll("..sub'd. wait 1s")
+      time.sleep(1)
+    puts_scroll("Init complete")
   except Exception as exc:
     puts_scroll(repr(exc))
     reset()
-  # Subscribed messages will be delivered to this callback
-  c.set_callback(sub_cb)
-  c.connect()
-  puts_scroll("%s OK" % (SERVER,))
-  for topic in store.keys():
-    puts_scroll("Sub'ing:%s" % (topic[-24:-16].decode(),))
-    puts_scroll("'%s'" % (topic[-16:].decode())) # only show last 16 chars bc the LCD is small
-    c.subscribe(topic)
-    puts_scroll("..sub'd. wait 1s")
-    time.sleep(1)
-  puts_scroll("Init complete")
 
   try:
     while 1:
