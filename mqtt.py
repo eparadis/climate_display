@@ -41,8 +41,8 @@ def puts_scroll(msg):
     current_line = 0
 
 def reset():
-  puts_scroll("reseting in 5s...")
-  time.sleep(5)
+  puts_scroll("reseting in 3s...")
+  time.sleep(3)
   import machine
   machine.reset()
 
@@ -63,8 +63,8 @@ def main():
       puts_scroll("Sub'ing:%s" % (topic[-24:-16].decode(),))
       puts_scroll("'%s'" % (topic[-16:].decode())) # only show last 16 chars bc the LCD is small
       c.subscribe(topic)
-      puts_scroll("..sub'd. wait 1s")
-      time.sleep(1)
+      puts_scroll("..sub'd.")
+      time.sleep_ms(300)
     puts_scroll("Init complete")
   except Exception as exc:
     puts_scroll(repr(exc))
